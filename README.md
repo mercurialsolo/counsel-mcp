@@ -144,17 +144,32 @@ Add to your VS Code settings (`settings.json`):
 
 ### Other MCP Clients
 
-For any MCP-compatible client, configure with:
+The server supports two transport modes. Choose based on your client's capabilities:
 
-- **Command**: `npx`
-- **Args**: `["-y", "counsel-mcp-server", "start"]`
-- **Transport**: `stdio` (default) or `http` at `http://localhost:3000/mcp`
+#### STDIO Mode (Default)
 
-#### HTTP Mode with OAuth (Advanced)
+Most MCP clients use STDIO transport. Configure with:
 
-For clients that support HTTP transport with OAuth 2.0, run the server in HTTP mode:
+```json
+{
+  "mcpServers": {
+    "counsel": {
+      "command": "npx",
+      "args": ["-y", "counsel-mcp-server", "start"],
+      "env": {
+        "COUNSEL_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+#### HTTP Mode with OAuth
+
+For clients that support HTTP transport with OAuth 2.0, run the server separately:
 
 ```bash
+# Start the HTTP server
 npx -y counsel-mcp-server http --port 3000
 ```
 
@@ -162,7 +177,8 @@ This starts an HTTP server with:
 - **MCP endpoint**: `http://localhost:3000/mcp`
 - **OAuth discovery**: `http://localhost:3000/.well-known/oauth-authorization-server`
 
-Then configure your client with:
+Then configure your client to connect:
+
 ```json
 {
   "mcpServers": {
@@ -174,7 +190,16 @@ Then configure your client with:
 }
 ```
 
-The HTTP mode proxies OAuth requests to Counsel's authorization server, enabling standard OAuth 2.0 authentication without manual API key configuration.
+HTTP mode uses OAuth 2.0 with automatic token management - no API key required.
+
+#### Transport Comparison
+
+| Feature | STDIO Mode | HTTP Mode |
+|---------|------------|-----------|
+| **Command** | `npx -y counsel-mcp-server start` | `npx -y counsel-mcp-server http` |
+| **Auth** | API key via env var | OAuth 2.0 (automatic) |
+| **Setup** | Single config | Run server + configure client |
+| **Best for** | Claude Desktop, Cursor, VS Code | Web clients, shared servers |
 
 ---
 
