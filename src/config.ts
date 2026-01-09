@@ -4,8 +4,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 // Load .env from project root if it exists (mostly for dev)
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+const __dirname = process.cwd();
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const ConfigSchema = z.object({
   COUNSEL_API_URL: z.string().default('https://counsel.getmason.dev'),

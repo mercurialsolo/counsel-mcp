@@ -1,0 +1,163 @@
+{
+  "type": "hosted",
+  "stateful": false,
+  "serverCard": {
+    "serverInfo": {
+      "name": "counsel-mcp",
+      "version": "0.1.3"
+    },
+    "tools": [
+      {
+        "name": "start_consultation",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "question": {
+              "type": "string",
+              "description": "The core question to verify or analyze."
+            },
+            "context": {
+              "description": "Additional context about the situation.",
+              "type": "string"
+            },
+            "mode": {
+              "default": "standard",
+              "description": "Depth of analysis.",
+              "type": "string",
+              "enum": [
+                "quick",
+                "standard",
+                "deep"
+              ]
+            },
+            "stakeholders": {
+              "description": "Key stakeholders to consider.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "question"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "get_consultation_status",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "debate_id": {
+              "type": "string",
+              "description": "The ID of the consultation to check."
+            }
+          },
+          "required": [
+            "debate_id"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "get_consultation_report",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "debate_id": {
+              "type": "string",
+              "description": "The ID of the consultation."
+            }
+          },
+          "required": [
+            "debate_id"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "list_consultations",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "default": 10,
+              "type": "number"
+            }
+          },
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "sharpen_question",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "question": {
+              "type": "string"
+            },
+            "context": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "question"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "consult_advisor",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "question": {
+              "type": "string",
+              "description": "The initial topic or question."
+            }
+          },
+          "required": [
+            "question"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      }
+    ],
+    "resources": [],
+    "prompts": []
+  },
+  "configSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "counselApiKey": {
+        "description": "API Key for Counsel (optional if using OAuth)",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  },
+  "source": {
+    "commit": "9a0e50661894e6e2c33bc6bd23f3370b24db9b41",
+    "branch": "main"
+  }
+}
