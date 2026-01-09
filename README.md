@@ -150,13 +150,17 @@ For any MCP-compatible client, configure with:
 - **Args**: `["-y", "counsel-mcp-server", "start"]`
 - **Transport**: `stdio` (default) or `http` at `http://localhost:3000/mcp`
 
-#### HTTP Mode (Advanced)
+#### HTTP Mode with OAuth (Advanced)
 
-If your client supports HTTP transport, you can run the server standalone:
+For clients that support HTTP transport with OAuth 2.0, run the server in HTTP mode:
 
 ```bash
-npx counsel-mcp-server start --port 3000
+npx -y counsel-mcp-server http --port 3000
 ```
+
+This starts an HTTP server with:
+- **MCP endpoint**: `http://localhost:3000/mcp`
+- **OAuth discovery**: `http://localhost:3000/.well-known/oauth-authorization-server`
 
 Then configure your client with:
 ```json
@@ -170,19 +174,48 @@ Then configure your client with:
 }
 ```
 
+The HTTP mode proxies OAuth requests to Counsel's authorization server, enabling standard OAuth 2.0 authentication without manual API key configuration.
+
 ---
 
 ## Authentication
 
-Authentication is handled automatically through OAuth 2.0:
+The server supports two authentication modes:
+
+### STDIO Mode (Default)
+
+Set the `COUNSEL_API_KEY` environment variable with your API key from [counsel.getmason.dev](https://counsel.getmason.dev):
+
+```bash
+export COUNSEL_API_KEY=your_api_key_here
+```
+
+Or add it to your MCP client configuration:
+```json
+{
+  "mcpServers": {
+    "counsel": {
+      "command": "npx",
+      "args": ["-y", "counsel-mcp-server", "start"],
+      "env": {
+        "COUNSEL_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+### HTTP Mode (OAuth 2.0)
+
+When running in HTTP mode (`npx -y counsel-mcp-server http`), authentication is handled automatically through OAuth 2.0:
 
 1. When you first use a Counsel tool, your MCP client will prompt for authentication
 2. You'll be redirected to sign in with your Counsel account
 3. After authorization, tokens are managed automatically
 
-**No manual login required** - your MCP client handles the entire flow.
+**No manual API key required** in HTTP mode - your MCP client handles the entire OAuth flow.
 
-### OAuth Endpoints
+### OAuth Endpoints (HTTP Mode)
 
 The server exposes standard OAuth 2.0 endpoints:
 
@@ -299,14 +332,18 @@ Check the status of consultation abc-123-def
 | `COUNSEL_API_URL` | `https://counsel.getmason.dev` | Counsel API base URL |
 | `PORT` | `3000` | Server port (HTTP mode) |
 
-### CLI Options
+### CLI Commands
 
 ```bash
-counsel-mcp start [options]
+# STDIO mode (default) - for most MCP clients
+npx -y counsel-mcp-server start
 
-Options:
+# HTTP mode - for clients supporting OAuth
+npx -y counsel-mcp-server http [options]
+
+HTTP Options:
   -p, --port <port>  Port to listen on (default: 3000)
-  -h, --host <host>  Host to bind to (default: localhost)
+  --host <host>      Host to bind to (default: localhost)
 ```
 
 ---
