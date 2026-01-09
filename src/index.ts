@@ -139,6 +139,10 @@ program.command("http")
 
     app.use("/mcp", mcpHandler);
 
+    app.get("/.well-known/mcp-config", (_req, res) => {
+      res.json({ sse: "/mcp" });
+    });
+
     app.get("/health", (_req, res) => {
       res.json({ status: "ok", version: "0.1.3" });
     });
