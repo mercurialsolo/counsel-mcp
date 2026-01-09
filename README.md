@@ -402,12 +402,24 @@ npm run build
 ### Commands
 
 ```bash
-npm run build       # Compile TypeScript
-npm run dev         # Watch mode
-npm run start       # Run server
-npm test            # Run tests
-npm run lint        # Type check
+npm run build            # Compile TypeScript
+npm run dev              # Watch mode
+npm run start            # Run server
+npm test                 # Run tests
+npm run lint             # Type check
+npm run security:check   # Scan staged files for secrets
+npm run security:check:all  # Scan all files for secrets
 ```
+
+### Security
+
+This project includes automated secret detection:
+
+- **Pre-commit hook**: Automatically scans staged files before each commit
+- **CI integration**: Security checks run on all pull requests
+- **Pattern detection**: AWS keys, GitHub tokens, API keys, private keys, etc.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md#security-checks) for details.
 
 ### Project Structure
 

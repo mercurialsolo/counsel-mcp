@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name("counsel-mcp")
   .description("Counsel MCP Server")
-  .version("0.1.2");
+  .version("0.1.3");
 
 /**
  * Create and configure the MCP server with all tools
@@ -21,7 +21,7 @@ program
 function createMcpServer(): McpServer {
   const server = new McpServer({
     name: "counsel-mcp",
-    version: "0.1.2",
+    version: "0.1.3",
   });
 
   // Register all tools
@@ -131,7 +131,7 @@ program.command("http")
     app.use("/mcp", mcpHandler);
 
     app.get("/health", (_req, res) => {
-      res.json({ status: "ok", version: "0.1.2" });
+      res.json({ status: "ok", version: "0.1.3" });
     });
 
     app.listen(port, host, () => {

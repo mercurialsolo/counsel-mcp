@@ -87,6 +87,44 @@ npm run test:watch
 - Use present tense: "Add feature" not "Added feature"
 - Reference issues when applicable: "Fix OAuth redirect (#123)"
 
+### Security Checks
+
+This project includes automated secret detection to prevent accidental leakage of API keys and tokens.
+
+**Pre-commit Hook**
+
+A pre-commit hook automatically scans staged files for potential secrets before each commit. If secrets are detected, the commit will be blocked.
+
+**Manual Security Scan**
+
+```bash
+# Scan staged files
+npm run security:check
+
+# Scan all tracked files
+npm run security:check:all
+```
+
+**Detected Patterns**
+
+The scanner detects:
+- API keys and secret keys
+- Bearer tokens
+- AWS credentials
+- GitHub tokens (PAT, OAuth, etc.)
+- npm tokens
+- Slack tokens
+- Stripe keys
+- Private keys
+- Passwords and generic tokens
+
+**False Positives**
+
+If you encounter a false positive:
+1. Add the file pattern to `.secretsignore`
+2. Use placeholder values like `your_api_key_here`
+3. Reference environment variables (`process.env.API_KEY`)
+
 ## Adding New Tools
 
 Tools are the core functionality of the MCP server. To add a new tool:

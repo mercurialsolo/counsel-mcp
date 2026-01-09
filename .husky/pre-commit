@@ -1,0 +1,5 @@
+# Run secrets detection
+node scripts/check-secrets.js
+
+# Run tests
+npm test
