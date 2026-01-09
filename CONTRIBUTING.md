@@ -183,7 +183,7 @@ Include:
 
 ## Questions?
 
-- Open a [GitHub Discussion](https://github.com/getmason-io/counsel-mcp-server/discussions)
+- Open a [GitHub Discussion](https://github.com/mercurialsolo/counsel-mcp/discussions)
 - Check existing issues and discussions first
 
 ## License

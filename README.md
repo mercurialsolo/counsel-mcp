@@ -356,7 +356,7 @@ For verbose logging, check your MCP client's logs or run the server directly in 
 ### Setup
 
 ```bash
-git clone https://github.com/getmason-io/counsel-mcp-server.git
+git clone https://github.com/mercurialsolo/counsel-mcp.git
 cd counsel-mcp-server
 npm install
 npm run build
@@ -410,5 +410,5 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 - [Counsel Platform](https://counsel.getmason.dev) - Strategic reasoning platform
 - [MCP Specification](https://modelcontextprotocol.io) - Model Context Protocol documentation
-- [GitHub Issues](https://github.com/getmason-io/counsel-mcp-server/issues) - Report bugs or request features
-- [GitHub Discussions](https://github.com/getmason-io/counsel-mcp-server/discussions) - Ask questions
+- [GitHub Issues](https://github.com/mercurialsolo/counsel-mcp/issues) - Report bugs or request features
+- [GitHub Discussions](https://github.com/mercurialsolo/counsel-mcp/discussions) - Ask questions

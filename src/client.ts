@@ -1,24 +1,16 @@
 import axios, { AxiosInstance } from 'axios';
-import { AsyncLocalStorage } from 'async_hooks';
 import { config } from './config.js';
 
-// Request-scoped storage for auth token
-interface RequestContext {
-  token: string;
-}
-
-export const requestContext = new AsyncLocalStorage<RequestContext>();
-
 /**
- * Get the current request's auth token from AsyncLocalStorage
+ * Get API key from environment variable
  */
-function getCurrentToken(): string | undefined {
-  return requestContext.getStore()?.token;
+function getApiKey(): string | undefined {
+  return process.env.COUNSEL_API_KEY;
 }
 
 /**
  * Pre-configured Axios client for Counsel API calls.
- * Automatically uses the Bearer token from the current request context.
+ * Uses COUNSEL_API_KEY environment variable for authentication.
  */
 export const apiClient: AxiosInstance = axios.create({
   baseURL: config.COUNSEL_API_URL,
@@ -29,13 +21,11 @@ export const apiClient: AxiosInstance = axios.create({
   }
 });
 
-// Add request interceptor to inject the auth token from request context
+// Add request interceptor to inject the auth token
 apiClient.interceptors.request.use(async (reqConfig) => {
-  const token = getCurrentToken();
-  if (token) {
-    reqConfig.headers.Authorization = `Bearer ${token}`;
-  } else {
-    console.warn("Auth Warning: No token in request context. API call may fail.");
+  const apiKey = getApiKey();
+  if (apiKey) {
+    reqConfig.headers.Authorization = `Bearer ${apiKey}`;
   }
   return reqConfig;
 });

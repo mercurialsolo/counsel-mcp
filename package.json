@@ -1,6 +1,6 @@
 {
   "name": "counsel-mcp-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Open-source MCP server for connecting AI agents to the Counsel API",
   "author": "Counsel AI",
   "license": "MIT",
@@ -49,12 +49,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getmason-io/counsel-mcp-server.git"
+    "url": "git+https://github.com/mercurialsolo/counsel-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/getmason-io/counsel-mcp-server/issues"
+    "url": "https://github.com/mercurialsolo/counsel-mcp/issues"
   },
-  "homepage": "https://github.com/getmason-io/counsel-mcp-server#readme",
+  "homepage": "https://github.com/mercurialsolo/counsel-mcp#readme",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
