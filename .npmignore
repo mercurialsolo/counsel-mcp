@@ -1,0 +1,18 @@
+# Source files (dist is published)
+src/
+tests/
+
+# Config files
+tsconfig.json
+vitest.config.ts
+.gitignore
+.env*
+
+# Development
+.vscode/
+.idea/
+*.log
+
+# Documentation (README and LICENSE are included via files in package.json)
+CONTRIBUTING.md
+CLAUDE.md
