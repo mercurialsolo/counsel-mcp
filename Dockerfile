@@ -17,6 +17,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev --ignore-scripts
 
+EXPOSE 8080
+
 COPY --from=builder /app/dist ./dist
 
 # Standard entrypoint for stdio mode

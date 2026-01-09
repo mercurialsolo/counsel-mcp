@@ -1,5 +1,5 @@
 startCommand:
-  type: stdio
+  type: http
   configSchema:
     type: object
     properties:
@@ -10,7 +10,7 @@ startCommand:
       - counselApiKey
   commandFunction: |-
     (config) => ({
-      command: ["node", "dist/index.js", "start"],
+      command: ["node", "dist/index.js", "http", "--port", "8080", "--host", "0.0.0.0"],
       env: {
         COUNSEL_API_KEY: config.counselApiKey
       }
