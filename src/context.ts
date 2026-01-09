@@ -1,6 +1,6 @@
-import { AsyncLocalStorage } from 'async_hooks';
+const { AsyncLocalStorage } = require('async_hooks');
 
-const tokenStorage = new AsyncLocalStorage<string>();
+const tokenStorage = new AsyncLocalStorage();
 
 /**
  * Run a function with the given auth token in context

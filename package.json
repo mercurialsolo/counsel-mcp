@@ -25,7 +25,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "npx smithery build && cp .smithery/bundle/user-module.js .smithery/index.cjs",
+    "build": "npx smithery build -t stdio",
     "dev": "npx smithery dev",
     "start": "node dist/index.js",
     "lint": "eslint src --ext .ts",
