@@ -11,18 +11,37 @@ export const TOOLS = {
       context: z.string().optional().describe("Additional context about the situation."),
       mode: z.enum(["quick", "standard", "deep"]).default("standard").describe("Depth of analysis."),
       stakeholders: z.array(z.string()).optional().describe("Key stakeholders to consider."),
+      // MSKS: Multi-Source Knowledge Synthesis parameters
+      deep_research: z.boolean().default(false).describe("Use multi-provider AI research (MSKS). Queries ChatGPT, Gemini, Claude, Grok, Kimi, DeepSeek in parallel and synthesizes findings."),
+      research_depth: z.enum(["quick", "standard", "deep"]).default("standard").describe("Depth for multi-provider research: 'quick', 'standard', or 'deep'."),
+      research_providers: z.array(z.string()).optional().describe("Specific providers for deep research. Options: chatgpt, gemini, claude, grok, kimi, deepseek. Omit for auto-select based on query."),
+      enable_dynamic_evidence: z.boolean().default(false).describe("Use dynamic evidence management with phase-specific compression. Optimizes context for each debate phase."),
     },
-    handler: async (args: { question: string, context?: string, mode?: string, stakeholders?: string[] }) => {
+    handler: async (args: {
+      question: string,
+      context?: string,
+      mode?: string,
+      stakeholders?: string[],
+      deep_research?: boolean,
+      research_depth?: string,
+      research_providers?: string[],
+      enable_dynamic_evidence?: boolean
+    }) => {
       const response = await apiClient.post("/debates", {
         question: args.question,
         context: args.context,
-        config: { mode: args.mode }, // Assuming API expects config object
-        stakeholders: args.stakeholders
+        config: { mode: args.mode },
+        stakeholders: args.stakeholders,
+        // MSKS parameters
+        deep_research: args.deep_research,
+        research_depth: args.research_depth,
+        research_providers: args.research_providers,
+        enable_dynamic_evidence: args.enable_dynamic_evidence
       });
       return {
-        content: [{ 
-          type: "text" as const, 
-          text: `Consultation started successfully.\nID: ${response.data.id}\nStatus: ${response.data.status}` 
+        content: [{
+          type: "text" as const,
+          text: `Consultation started successfully.\nID: ${response.data.id}\nStatus: ${response.data.status}`
         }]
       };
     }
