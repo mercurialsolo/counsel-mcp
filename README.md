@@ -1,43 +1,164 @@
 # Counsel MCP Server
 
-An open-source [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that connects AI agents to the [Counsel](https://counsel.getmason.dev) API for strategic reasoning and advisor sessions.
+[![npm version](https://img.shields.io/npm/v/counsel-mcp-server.svg)](https://www.npmjs.com/package/counsel-mcp-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/node/v/counsel-mcp-server.svg)](https://nodejs.org)
+
+An open-source [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that connects AI agents to the [Counsel](https://counsel.getmason.dev) API for strategic reasoning and multi-perspective analysis.
 
 ## Features
 
 - **Strategic Reasoning** - Access Counsel's debate and multi-perspective reasoning engines
 - **Advisor Sessions** - Run interactive intake and profile tuning sessions
-- **Native OAuth** - Standard MCP OAuth 2.0 authentication handled automatically by clients
+- **Native OAuth 2.0** - Standard MCP authentication handled automatically by clients
 - **HTTP Transport** - Works with any MCP client supporting HTTP/SSE transport
 
-## Quick Start
+---
 
-### Option 1: Run with npx
+## Table of Contents
 
-```bash
-npx counsel-mcp-server start
+- [Installation](#installation)
+  - [Claude Desktop](#claude-desktop)
+  - [Claude Code (CLI)](#claude-code-cli)
+  - [Cursor](#cursor)
+  - [Windsurf](#windsurf)
+  - [VS Code with Copilot](#vs-code-with-copilot)
+  - [Other MCP Clients](#other-mcp-clients)
+- [Authentication](#authentication)
+- [Available Tools](#available-tools)
+- [Usage Examples](#usage-examples)
+- [Configuration](#configuration)
+- [Troubleshooting](#troubleshooting)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## Installation
+
+### Prerequisites
+
+1. **Node.js 18+** installed on your system
+2. A **Counsel account** at [counsel.getmason.dev](https://counsel.getmason.dev)
+
+### Claude Desktop
+
+Add to your `claude_desktop_config.json`:
+
+<details>
+<summary><b>macOS</b>: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></summary>
+
+```json
+{
+  "mcpServers": {
+    "counsel": {
+      "command": "npx",
+      "args": ["-y", "counsel-mcp-server", "start"]
+    }
+  }
+}
 ```
 
-The server runs at `http://localhost:3000` by default.
+</details>
 
-### Option 2: Install globally
+<details>
+<summary><b>Windows</b>: <code>%APPDATA%\Claude\claude_desktop_config.json</code></summary>
 
-```bash
-npm install -g counsel-mcp-server
-counsel-mcp start
+```json
+{
+  "mcpServers": {
+    "counsel": {
+      "command": "npx",
+      "args": ["-y", "counsel-mcp-server", "start"]
+    }
+  }
+}
 ```
 
-### CLI Options
+</details>
+
+### Claude Code (CLI)
 
 ```bash
-counsel-mcp start --port 8080 --host 0.0.0.0
+claude mcp add counsel -- npx -y counsel-mcp-server start
 ```
 
-## Client Configuration
+Or manually add to your MCP settings:
 
-### Claude Desktop / Claude Code
+```json
+{
+  "mcpServers": {
+    "counsel": {
+      "command": "npx",
+      "args": ["-y", "counsel-mcp-server", "start"]
+    }
+  }
+}
+```
 
-Add to your MCP configuration:
+### Cursor
 
+Add to your Cursor MCP configuration (`.cursor/mcp.json` in your project or global settings):
+
+```json
+{
+  "mcpServers": {
+    "counsel": {
+      "command": "npx",
+      "args": ["-y", "counsel-mcp-server", "start"]
+    }
+  }
+}
+```
+
+### Windsurf
+
+Add to your Windsurf MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "counsel": {
+      "command": "npx",
+      "args": ["-y", "counsel-mcp-server", "start"]
+    }
+  }
+}
+```
+
+### VS Code with Copilot
+
+Add to your VS Code settings (`settings.json`):
+
+```json
+{
+  "mcp.servers": {
+    "counsel": {
+      "command": "npx",
+      "args": ["-y", "counsel-mcp-server", "start"]
+    }
+  }
+}
+```
+
+### Other MCP Clients
+
+For any MCP-compatible client, configure with:
+
+- **Command**: `npx`
+- **Args**: `["-y", "counsel-mcp-server", "start"]`
+- **Transport**: `stdio` (default) or `http` at `http://localhost:3000/mcp`
+
+#### HTTP Mode (Advanced)
+
+If your client supports HTTP transport, you can run the server standalone:
+
+```bash
+npx counsel-mcp-server start --port 3000
+```
+
+Then configure your client with:
 ```json
 {
   "mcpServers": {
@@ -49,37 +170,181 @@ Add to your MCP configuration:
 }
 ```
 
-### Cursor / VSCode / Other MCP Clients
-
-Configure the HTTP endpoint `http://localhost:3000/mcp` in your client's MCP settings. The client will automatically discover OAuth endpoints via `/.well-known/oauth-authorization-server`.
+---
 
 ## Authentication
 
-Authentication is handled automatically by MCP clients through standard OAuth 2.0:
+Authentication is handled automatically through OAuth 2.0:
 
-1. Client discovers OAuth metadata at `/.well-known/oauth-authorization-server`
-2. Client initiates OAuth flow via `/authorize`
-3. User authenticates with their Counsel account
-4. Client receives tokens and includes them in MCP requests
+1. When you first use a Counsel tool, your MCP client will prompt for authentication
+2. You'll be redirected to sign in with your Counsel account
+3. After authorization, tokens are managed automatically
 
-No manual login step required - your MCP client handles everything.
+**No manual login required** - your MCP client handles the entire flow.
+
+### OAuth Endpoints
+
+The server exposes standard OAuth 2.0 endpoints:
+
+| Endpoint | Description |
+|----------|-------------|
+| `/.well-known/oauth-authorization-server` | OAuth metadata discovery |
+| `/authorize` | Authorization endpoint |
+| `/token` | Token exchange endpoint |
+| `/register` | Dynamic client registration |
+
+---
 
 ## Available Tools
 
-| Tool | Description |
-|------|-------------|
-| `start_consultation` | Start a new strategic consultation/debate |
-| `get_consultation_status` | Check the status of a running consultation |
-| `get_consultation_report` | Retrieve the final report from a consultation |
-| `list_consultations` | List all consultations |
-| `sharpen_question` | Refine and improve a question before consultation |
-| `consult_advisor` | Start an interactive advisor session |
+### `start_consultation`
 
-## Environment Variables
+Start a new strategic consultation (debate) to analyze a complex question with multiple perspectives.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `question` | string | Yes | The core question to analyze |
+| `context` | string | No | Additional context about the situation |
+| `mode` | enum | No | Depth of analysis: `quick`, `standard` (default), `deep` |
+| `stakeholders` | string[] | No | Key stakeholders to consider |
+
+**Example:**
+```
+Start a consultation about "Should we migrate our monolith to microservices?"
+with context about our 50-person engineering team and mode set to deep
+```
+
+### `get_consultation_status`
+
+Check the status of an ongoing consultation.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `debate_id` | string | Yes | The ID of the consultation |
+
+### `get_consultation_report`
+
+Retrieve the final synthesis report from a completed consultation.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `debate_id` | string | Yes | The ID of the consultation |
+
+### `list_consultations`
+
+List your past consultations.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `limit` | number | No | Number of results (default: 10) |
+
+### `sharpen_question`
+
+Refine and improve a strategic question before starting a consultation.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `question` | string | Yes | The question to refine |
+| `context` | string | No | Additional context |
+
+**Example:**
+```
+Sharpen this question: "Is AI good for our company?"
+```
+
+### `consult_advisor`
+
+Start an interactive advisor session for brainstorming or scoping problems.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `question` | string | Yes | The initial topic or question |
+
+---
+
+## Usage Examples
+
+### Strategic Decision Making
+
+```
+Use Counsel to analyze: "Should we expand into the European market in 2025?"
+
+Consider these stakeholders: CEO, CFO, Head of Sales, Legal
+Use deep analysis mode
+```
+
+### Question Refinement
+
+```
+Use the sharpen_question tool to improve this question:
+"How do we fix our culture?"
+
+Context: We're a 200-person startup experiencing rapid growth
+```
+
+### Checking Consultation Progress
+
+```
+Check the status of consultation abc-123-def
+```
+
+---
+
+## Configuration
+
+### Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `COUNSEL_API_URL` | `https://counsel.getmason.dev` | Counsel API base URL |
+| `PORT` | `3000` | Server port (HTTP mode) |
+
+### CLI Options
+
+```bash
+counsel-mcp start [options]
+
+Options:
+  -p, --port <port>  Port to listen on (default: 3000)
+  -h, --host <host>  Host to bind to (default: localhost)
+```
+
+---
+
+## Troubleshooting
+
+### "Tool not found" Error
+
+Ensure the MCP server is properly configured in your client. Restart your client after adding the configuration.
+
+### Authentication Issues
+
+1. Check that you have a valid Counsel account
+2. Try removing and re-adding the MCP server configuration
+3. Clear your client's MCP cache if available
+
+### Connection Refused
+
+If running in HTTP mode, ensure:
+- The server is running (`npx counsel-mcp-server start`)
+- The port isn't blocked by a firewall
+- No other process is using the same port
+
+### Server Not Starting
+
+```bash
+# Check Node.js version (requires 18+)
+node --version
+
+# Try running directly to see errors
+npx counsel-mcp-server start
+```
+
+### Debug Mode
+
+For verbose logging, check your MCP client's logs or run the server directly in a terminal to see output.
+
+---
 
 ## Development
 
@@ -94,96 +359,56 @@ No manual login step required - your MCP client handles everything.
 git clone https://github.com/getmason-io/counsel-mcp-server.git
 cd counsel-mcp-server
 npm install
-```
-
-### Build
-
-```bash
 npm run build
 ```
 
-### Run in Development
+### Commands
 
 ```bash
-npm run dev      # Watch mode for TypeScript
-npm run start    # Run the server
+npm run build       # Compile TypeScript
+npm run dev         # Watch mode
+npm run start       # Run server
+npm test            # Run tests
+npm run lint        # Type check
 ```
 
 ### Project Structure
 
 ```
 src/
-├── index.ts      # HTTP server, OAuth proxy, MCP transport
-├── client.ts     # Axios client with request-scoped auth
-├── config.ts     # Environment configuration
+├── index.ts        # HTTP server, OAuth proxy, MCP transport
+├── client.ts       # API client with request-scoped auth
+├── config.ts       # Environment configuration
 └── tools/
-    ├── debates.ts   # Consultation/debate tools
-    └── advisor.ts   # Advisor session tools
+    ├── debates.ts  # Consultation tools
+    └── advisor.ts  # Advisor session tools
 ```
+
+---
 
 ## Contributing
 
-We welcome contributions! Please follow these guidelines:
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-### Getting Started
+### Quick Start
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Make your changes
-4. Run tests: `npm test`
+3. Make your changes and add tests
+4. Run `npm test` to ensure tests pass
 5. Submit a pull request
 
-### Code Style
-
-- TypeScript strict mode
-- ES modules (use `.js` extension in imports)
-- Follow existing patterns in the codebase
-
-### Adding New Tools
-
-1. Create or edit a file in `src/tools/`
-2. Export a `TOOLS` object:
-
-```typescript
-export const TOOLS = {
-  my_tool: {
-    name: "my_tool",
-    description: "What this tool does",
-    schema: {
-      param: z.string().describe("Parameter description"),
-    },
-    handler: async (args: { param: string }) => {
-      // Implementation
-      return {
-        content: [{ type: "text" as const, text: "Result" }]
-      };
-    }
-  }
-};
-```
-
-3. Import and register in `src/index.ts`
-
-### Pull Request Guidelines
-
-- Include tests for new functionality
-- Update documentation as needed
-- Keep changes focused and atomic
-- Write clear commit messages
-
-## Testing
-
-```bash
-npm test           # Run all tests
-npm run test:watch # Watch mode
-```
+---
 
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
 
+---
+
 ## Links
 
-- [Counsel](https://counsel.getmason.dev) - Strategic reasoning platform
-- [MCP Specification](https://modelcontextprotocol.io) - Model Context Protocol docs
-- [Report Issues](https://github.com/getmason-io/counsel-mcp-server/issues)
+- [Counsel Platform](https://counsel.getmason.dev) - Strategic reasoning platform
+- [MCP Specification](https://modelcontextprotocol.io) - Model Context Protocol documentation
+- [GitHub Issues](https://github.com/getmason-io/counsel-mcp-server/issues) - Report bugs or request features
+- [GitHub Discussions](https://github.com/getmason-io/counsel-mcp-server/discussions) - Ask questions
