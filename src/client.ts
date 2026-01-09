@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { config } from './config.js';
+import { getToken } from './context.js';
 
 /**
  * Get API key from environment variable
@@ -10,7 +11,7 @@ function getApiKey(): string | undefined {
 
 /**
  * Pre-configured Axios client for Counsel API calls.
- * Uses COUNSEL_API_KEY environment variable for authentication.
+ * Uses context token (oauth) or COUNSEL_API_KEY environment variable for authentication.
  */
 export const apiClient: AxiosInstance = axios.create({
   baseURL: config.COUNSEL_API_URL,
@@ -23,7 +24,10 @@ export const apiClient: AxiosInstance = axios.create({
 
 // Add request interceptor to inject the auth token
 apiClient.interceptors.request.use(async (reqConfig) => {
-  const apiKey = getApiKey();
+  // Prefer context token (from incoming request) over global env var
+  const contextToken = getToken();
+  const apiKey = contextToken || getApiKey();
+  
   if (apiKey) {
     reqConfig.headers.Authorization = `Bearer ${apiKey}`;
   }

@@ -5,14 +5,12 @@ startCommand:
     properties:
       counselApiKey:
         type: string
-        description: Your Counsel API Key
-    required:
-      - counselApiKey
+        description: Your Counsel API Key (Optional if using OAuth)
   commandFunction: |-
     (config) => ({
       command: ["node", "dist/index.js", "http", "--port", "8080", "--host", "0.0.0.0"],
       env: {
-        COUNSEL_API_KEY: config.counselApiKey
+        COUNSEL_API_KEY: config.counselApiKey || ""
       }
     })
 build:

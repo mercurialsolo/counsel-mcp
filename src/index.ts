@@ -114,6 +114,7 @@ program.command("http")
 
     mcpHandler.all("/", async (req, res) => {
       const sessionId = req.headers["mcp-session-id"] as string || randomUUID();
+      const authToken = req.headers.authorization?.replace(/^Bearer\s+/i, "");
 
       let transport = transports.get(sessionId);
       if (!transport) {
@@ -125,7 +126,15 @@ program.command("http")
         transport.onclose = () => transports.delete(sessionId);
       }
 
-      await transport.handleRequest(req, res);
+      const { runWithToken } = await import("./context.js");
+      
+      if (authToken) {
+        await runWithToken(authToken, async () => {
+          await transport!.handleRequest(req, res);
+        });
+      } else {
+        await transport.handleRequest(req, res);
+      }
     });
 
     app.use("/mcp", mcpHandler);
