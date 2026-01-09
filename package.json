@@ -1,6 +1,6 @@
 {
   "name": "counsel-mcp-server",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Open-source MCP server for connecting AI agents to the Counsel API",
   "author": "Counsel AI",
   "license": "MIT",
@@ -22,7 +22,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "build": "npx smithery build -t stdio",
