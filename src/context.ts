@@ -1,4 +1,4 @@
-const { AsyncLocalStorage } = require('async_hooks');
+import { AsyncLocalStorage } from 'async_hooks';
 
 const tokenStorage = new AsyncLocalStorage();
 
