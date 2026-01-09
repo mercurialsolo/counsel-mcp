@@ -91,7 +91,28 @@ program.command("http")
     });
 
     const app = express();
+    
+    // Add logging and CORS middleware
+    app.use((req, res, next) => {
+      console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+      
+      // CORS Headers
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+      res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, mcp-session-id");
+      
+      if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+      }
+      next();
+    });
+
     app.use(express.json());
+
+    // Public MCP config endpoint
+    app.get("/.well-known/mcp-config", (_req, res) => {
+      res.json({ sse: `${baseUrl.href}mcp` });
+    });
 
     // OAuth routes
     app.use(mcpAuthRouter({
@@ -139,9 +160,7 @@ program.command("http")
 
     app.use("/mcp", mcpHandler);
 
-    app.get("/.well-known/mcp-config", (_req, res) => {
-      res.json({ sse: "/mcp" });
-    });
+
 
     app.get("/health", (_req, res) => {
       res.json({ status: "ok", version: "0.1.3" });
