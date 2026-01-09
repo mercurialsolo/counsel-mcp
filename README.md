@@ -8,16 +8,18 @@ An open-source [Model Context Protocol (MCP)](https://modelcontextprotocol.io) s
 
 ## Features
 
+- **Hosted & Self-Hosted** - Use the hosted server instantly or run your own instance
 - **Strategic Reasoning** - Access Counsel's debate and multi-perspective reasoning engines
 - **Advisor Sessions** - Run interactive intake and profile tuning sessions
 - **Native OAuth 2.0** - Standard MCP authentication handled automatically by clients
-- **HTTP Transport** - Works with any MCP client supporting HTTP/SSE transport
+- **Dual Transport** - STDIO for local clients, HTTP for web clients and shared servers
 
 ---
 
 ## Table of Contents
 
-- [Installation](#installation)
+- [Quick Start (Hosted)](#quick-start-hosted)
+- [Installation (Self-Hosted)](#installation-self-hosted)
   - [Claude Desktop](#claude-desktop)
   - [Claude Code (CLI)](#claude-code-cli)
   - [Cursor](#cursor)
@@ -35,7 +37,34 @@ An open-source [Model Context Protocol (MCP)](https://modelcontextprotocol.io) s
 
 ---
 
-## Installation
+## Quick Start (Hosted)
+
+Connect instantly to the hosted Counsel MCP server - no installation required:
+
+```
+http://counsel-mcp.getmason.dev/mcp
+```
+
+For MCP clients that support HTTP transport, simply add:
+
+```json
+{
+  "mcpServers": {
+    "counsel": {
+      "url": "http://counsel-mcp.getmason.dev/mcp",
+      "transport": "http"
+    }
+  }
+}
+```
+
+OAuth authentication is handled automatically by your MCP client.
+
+---
+
+## Installation (Self-Hosted)
+
+Run your own instance of the Counsel MCP server locally.
 
 ### Prerequisites
 
