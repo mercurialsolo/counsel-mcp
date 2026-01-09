@@ -1,0 +1,21 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      counselApiKey:
+        type: string
+        description: Your Counsel API Key
+    required:
+      - counselApiKey
+  commandFunction: |-
+    (config) => ({
+      command: ["node", "dist/index.js", "start"],
+      env: {
+        COUNSEL_API_KEY: config.counselApiKey
+      }
+    })
+build:
+  dockerfile: Dockerfile
+  context: .
+runtime: container
