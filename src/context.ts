@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from 'async_hooks';
 
-const tokenStorage = new AsyncLocalStorage();
+const tokenStorage = new AsyncLocalStorage<string>();
 
 /**
  * Run a function with the given auth token in context

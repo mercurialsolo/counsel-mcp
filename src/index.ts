@@ -49,7 +49,7 @@ export default function createServer(args: { config?: { counselApiKey?: string }
   // Create server instance
   const server = new McpServer({
     name: "counsel-mcp",
-    version: "0.1.6",
+    version: "0.2.0",
   });
 
   // Register all tools
