@@ -12,9 +12,9 @@ export const TOOLS = {
       mode: z.enum(["quick", "standard", "deep", "research"]).default("standard").describe("Analysis depth: 'quick' (30s pros/cons), 'standard' (full debate), 'deep' (with research), 'research' (evidence only)."),
       stakeholders: z.array(z.string()).optional().describe("Key stakeholders to consider."),
       // MSKS: Multi-Source Knowledge Synthesis parameters
-      deep_research: z.boolean().default(false).describe("Use multi-provider AI research (MSKS). Queries ChatGPT, Gemini, Claude, Grok, Kimi, DeepSeek in parallel and synthesizes findings."),
-      research_depth: z.enum(["quick", "standard", "deep"]).default("standard").describe("Depth for multi-provider research: 'quick', 'standard', or 'deep'."),
-      research_providers: z.array(z.string()).optional().describe("Specific providers for deep research. Options: chatgpt, gemini, claude, grok, kimi, deepseek. Invalid names are skipped gracefully."),
+      deep_research: z.boolean().default(false).describe("Use multi-provider AI research (MSKS). Queries providers in parallel and synthesizes findings."),
+      research_depth: z.enum(["quick", "standard", "deep"]).default("standard").describe("Depth for research: 'quick' (3 standard), 'standard' (6 standard), 'deep' (4 dedicated deep research providers)."),
+      research_providers: z.array(z.string()).optional().describe("Specific providers (any combination). Standard: chatgpt, gemini, claude, grok, kimi, deepseek. Deep: openai_deep_research, perplexity_sonar, gemini_deep_research, parallel_deep_research."),
       enable_dynamic_evidence: z.boolean().default(false).describe("Use dynamic evidence management with phase-specific compression. Optimizes context for each debate phase."),
       // MCDA: Multi-Criteria Decision Analysis parameters
       enable_mcda: z.boolean().default(false).describe("Enable multi-criteria decision analysis (MCDA) scoring. Requires criteria_weights to be set."),
@@ -216,19 +216,30 @@ export const TOOLS = {
 
   run_deep_research: {
     name: "run_deep_research",
-    description: "Run standalone deep research across multiple AI providers WITHOUT a debate. Queries providers in parallel and synthesizes findings.",
+    description: `Run standalone research across multiple AI providers WITHOUT a debate.
+
+Available providers (any combination allowed):
+- Standard: chatgpt, gemini, claude, grok, kimi, deepseek
+- Deep research: openai_deep_research, perplexity_sonar, gemini_deep_research, parallel_deep_research
+
+Depth controls auto-selection when providers not specified:
+- 'quick': chatgpt, gemini, grok (~30s)
+- 'standard': all 6 standard providers (~2-5 min)
+- 'deep': all 4 deep research providers (~10-60 min)`,
     schema: {
       query: z.string().min(10).describe("Research question or topic to investigate."),
       context: z.string().optional().describe("Additional context to guide the research."),
-      depth: z.enum(["quick", "standard", "deep"]).default("standard").describe("Research depth: 'quick' (fast scan), 'standard' (balanced), 'deep' (comprehensive)."),
-      providers: z.array(z.string()).optional().describe("Specific providers to use: chatgpt, gemini, claude, grok, kimi, deepseek. Invalid names are skipped gracefully.")
+      depth: z.enum(["quick", "standard", "deep"]).default("standard").describe("Research depth - controls auto-selection: 'quick' (~30s), 'standard' (~2-5min), 'deep' (~10-60min with deep research providers)."),
+      providers: z.array(z.string()).optional().describe("Specific providers (any combination). Standard: chatgpt, gemini, claude, grok, kimi, deepseek. Deep: openai_deep_research, perplexity_sonar, gemini_deep_research, parallel_deep_research."),
+      timeout: z.number().optional().describe("Timeout in seconds. Deep providers default to 3600 (1 hour).")
     },
-    handler: async (args: { query: string, context?: string, depth?: string, providers?: string[] }) => {
+    handler: async (args: { query: string, context?: string, depth?: string, providers?: string[], timeout?: number }) => {
       const response = await apiClient.post("/research/deep", {
         query: args.query,
         context: args.context,
         depth: args.depth || "standard",
-        providers: args.providers
+        providers: args.providers,
+        timeout: args.timeout
       });
       const data = response.data;
       const summary = [
