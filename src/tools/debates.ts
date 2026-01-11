@@ -141,7 +141,15 @@ export const TOOLS = {
 
   manage_consultation: {
     name: "manage_consultation",
-    description: "Intervene in or modify a running consultation. Use to pause, resume, abort, steer, or add sources to an ongoing analysis.",
+    description: `Intervene in or modify a running consultation. Use to pause, resume, abort, steer, or add sources to an ongoing analysis.
+
+PHASE CONSTRAINTS (actions are only valid during specific phases):
+- 'pause': Valid during active debate (diverge, attack, crux, integrate)
+- 'resume': Valid only when paused
+- 'abort': Valid during any running or paused debate
+- 'steer': Valid during active debate or when paused
+- 'modify_tensions': Valid ONLY during crux phase (after tensions identified)
+- 'add_sources': Valid during active debate or when paused`,
     schema: {
       analysis_id: z.string().describe("The ID of the consultation to manage."),
       action: z.enum(["pause", "resume", "abort", "steer", "modify_tensions", "add_sources"]).describe("The intervention action to perform."),
@@ -324,6 +332,86 @@ Multi-agent features (Anthropic research patterns):
       }).join("\n");
       return {
         content: [{ type: "text" as const, text: `${args.type} (${items.length} items):\n${summary}` }]
+      };
+    }
+  },
+
+  retrieve_research_artifact: {
+    name: "retrieve_research_artifact",
+    description: `Retrieve full research artifact from storage.
+
+Enables on-demand retrieval during synthesis or crux phases.
+When evidence has been compressed to fit in context, this tool
+allows retrieving the full original research results.
+
+USE THIS WHEN:
+- You need more detail than the compressed evidence provides
+- You want to see all findings from a research run
+- You need to verify sources referenced in the summary`,
+    schema: {
+      artifact_ref_id: z.string().describe("Artifact reference ID (e.g., 'art_abc123')"),
+      include_full_text: z.boolean().default(false).describe("Include full source text (increases size)")
+    },
+    handler: async (args: { artifact_ref_id: string, include_full_text?: boolean }) => {
+      try {
+        const response = await apiClient.get(`/research/artifacts/${args.artifact_ref_id}`, {
+          params: { include_full_text: args.include_full_text }
+        });
+        const data = response.data;
+        const summary = [
+          `Artifact: ${data.ref_id}`,
+          `Provider: ${data.provider_id}`,
+          `Query: ${data.query}`,
+          `\n## Findings (${data.findings_count || data.findings?.length || 0})`,
+          ...(data.findings?.slice(0, 10).map((f: any) => `- [${f.confidence?.toFixed(2)}] ${f.claim}`) || []),
+          data.findings?.length > 10 ? `... and ${data.findings.length - 10} more` : null,
+          `\n## Sources (${data.sources_count || data.sources?.length || 0})`,
+          ...(data.sources?.slice(0, 5).map((s: any) => `- ${s.title}: ${s.text?.substring(0, 100)}...`) || []),
+          data.sources?.length > 5 ? `... and ${data.sources.length - 5} more` : null,
+          data.summary ? `\n## Summary\n${data.summary}` : null
+        ].filter(Boolean).join("\n");
+        return {
+          content: [{ type: "text" as const, text: summary }]
+        };
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          return {
+            content: [{ type: "text" as const, text: `Artifact not found: ${args.artifact_ref_id}. The artifact may have expired or the ID is incorrect.` }]
+          };
+        }
+        throw err;
+      }
+    }
+  },
+
+  list_research_artifacts: {
+    name: "list_research_artifacts",
+    description: `List stored research artifacts.
+
+Returns summaries of available artifacts that can be retrieved
+using retrieve_research_artifact.
+
+USE THIS WHEN:
+- You need to find artifacts from previous research runs
+- You want to see what research data is available for retrieval`,
+    schema: {
+      limit: z.number().optional().default(20).describe("Maximum number of artifacts to return")
+    },
+    handler: async (args: { limit?: number }) => {
+      const response = await apiClient.get("/research/artifacts", {
+        params: { limit: args.limit || 20 }
+      });
+      const artifacts = response.data.artifacts || response.data.items || response.data || [];
+      if (artifacts.length === 0) {
+        return {
+          content: [{ type: "text" as const, text: "No research artifacts found." }]
+        };
+      }
+      const summary = artifacts.map((a: any) =>
+        `- [${a.ref_id}] ${a.provider_id}: "${a.query?.substring(0, 50)}..." (${a.findings_count || 0} findings, ${a.sources_count || 0} sources)`
+      ).join("\n");
+      return {
+        content: [{ type: "text" as const, text: `Research Artifacts (${artifacts.length}):\n${summary}` }]
       };
     }
   }
