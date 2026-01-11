@@ -12,7 +12,7 @@ const program = new Command();
 program
   .name("counsel-mcp")
   .description("Counsel MCP Server")
-  .version("0.2.1");
+  .version("0.2.2");
 
 program.command("start")
   .description("Start the MCP server in stdio mode (default)")

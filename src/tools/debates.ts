@@ -225,21 +225,46 @@ Available providers (any combination allowed):
 Depth controls auto-selection when providers not specified:
 - 'quick': chatgpt, gemini, grok (~30s)
 - 'standard': all 6 standard providers (~2-5 min)
-- 'deep': all 4 deep research providers (~10-60 min)`,
+- 'deep': all 4 deep research providers (~10-60 min)
+
+Multi-agent features (Anthropic research patterns):
+- use_planner: Query decomposition into focused sub-questions with facet-aware synthesis
+- verify_citations: Post-research citation quality verification
+- evaluate_quality: Quality assessment with gap detection and follow-up recommendations
+- judge_quality: LLM-as-judge evaluation with 5-dimensional scoring`,
     schema: {
       query: z.string().min(10).describe("Research question or topic to investigate."),
       context: z.string().optional().describe("Additional context to guide the research."),
       depth: z.enum(["quick", "standard", "deep"]).default("standard").describe("Research depth - controls auto-selection: 'quick' (~30s), 'standard' (~2-5min), 'deep' (~10-60min with deep research providers)."),
       providers: z.array(z.string()).optional().describe("Specific providers (any combination). Standard: chatgpt, gemini, claude, grok, kimi, deepseek. Deep: openai_deep_research, perplexity_sonar, gemini_deep_research, parallel_deep_research."),
-      timeout: z.number().optional().describe("Timeout in seconds. Deep providers default to 3600 (1 hour).")
+      timeout: z.number().optional().describe("Timeout in seconds. Deep providers default to 3600 (1 hour)."),
+      // Multi-agent research features (Anthropic patterns)
+      use_planner: z.boolean().default(false).describe("Enable query decomposition using Claude Opus. Breaks complex queries into focused sub-questions with facet-aware synthesis."),
+      verify_citations: z.boolean().default(false).describe("Enable citation verification post-research. Checks that findings have proper source attribution."),
+      evaluate_quality: z.boolean().default(false).describe("Enable quality evaluation with gap detection. Provides follow-up query recommendations for uncovered aspects."),
+      judge_quality: z.boolean().default(false).describe("Enable LLM-as-judge evaluation with 5-dimensional scoring: factual accuracy, citation accuracy, completeness, source quality, synthesis quality.")
     },
-    handler: async (args: { query: string, context?: string, depth?: string, providers?: string[], timeout?: number }) => {
+    handler: async (args: {
+      query: string,
+      context?: string,
+      depth?: string,
+      providers?: string[],
+      timeout?: number,
+      use_planner?: boolean,
+      verify_citations?: boolean,
+      evaluate_quality?: boolean,
+      judge_quality?: boolean
+    }) => {
       const response = await apiClient.post("/research/deep", {
         query: args.query,
         context: args.context,
         depth: args.depth || "standard",
         providers: args.providers,
-        timeout: args.timeout
+        timeout: args.timeout,
+        use_planner: args.use_planner,
+        verify_citations: args.verify_citations,
+        evaluate_quality: args.evaluate_quality,
+        judge_quality: args.judge_quality
       });
       const data = response.data;
       const summary = [
@@ -254,6 +279,10 @@ Depth controls auto-selection when providers not specified:
         `\n## Sources (${data.sources?.length || 0})`,
         ...(data.sources?.slice(0, 5).map((s: any) => `- ${s.title}`) || []),
         data.sources?.length > 5 ? `... and ${data.sources.length - 5} more` : null,
+        // Multi-agent evaluation results
+        data.citation_verification ? `\n## Citation Verification\n- Verified: ${data.citation_verification.findings_verified}\n- Flagged: ${data.citation_verification.findings_flagged}\n- Unsupported: ${data.citation_verification.findings_unsupported}\n- Overall quality: ${(data.citation_verification.overall_citation_quality * 100).toFixed(0)}%` : null,
+        data.quality_evaluation ? `\n## Quality Evaluation\n- Completeness: ${(data.quality_evaluation.completeness_score * 100).toFixed(0)}%\n- Source diversity: ${(data.quality_evaluation.source_diversity_score * 100).toFixed(0)}%\n- Recency: ${(data.quality_evaluation.recency_score * 100).toFixed(0)}%\n- Depth: ${(data.quality_evaluation.depth_score * 100).toFixed(0)}%\n- Overall: ${(data.quality_evaluation.overall_quality_score * 100).toFixed(0)}%${data.quality_evaluation.coverage_gaps?.length ? `\n- Gaps: ${data.quality_evaluation.coverage_gaps.join(", ")}` : ""}` : null,
+        data.judgment ? `\n## LLM-as-Judge Evaluation\n- Factual accuracy: ${(data.judgment.factual_accuracy * 100).toFixed(0)}%\n- Citation accuracy: ${(data.judgment.citation_accuracy * 100).toFixed(0)}%\n- Completeness: ${(data.judgment.completeness * 100).toFixed(0)}%\n- Source quality: ${(data.judgment.source_quality * 100).toFixed(0)}%\n- Synthesis quality: ${(data.judgment.synthesis_quality * 100).toFixed(0)}%\n- Overall: ${(data.judgment.overall_score * 100).toFixed(0)}%${data.judgment.feedback ? `\n- Feedback: ${data.judgment.feedback}` : ""}` : null
       ].filter(Boolean).join("\n");
       return {
         content: [{ type: "text" as const, text: summary }]
