@@ -10,6 +10,9 @@ export const TOOLS = {
       question: z.string().describe("The core question to verify or analyze."),
       context: z.string().optional().describe("Additional context about the situation."),
       mode: z.enum(["quick", "standard", "deep", "research"]).default("standard").describe("Analysis depth: 'quick' (30s pros/cons), 'standard' (full debate), 'deep' (with research), 'research' (evidence only)."),
+      counsel_id: z.string().optional().describe("Optional counsel/persona configuration ID to use."),
+      debate_mode: z.enum(["fast", "standard", "deep"]).optional().describe("Optional debate mode override (fast/standard/deep) to tune speed vs rigor."),
+      max_budget_cents: z.number().int().optional().describe("Optional soft budget cap in cents for the debate."),
       stakeholders: z.array(z.string()).optional().describe("Key stakeholders to consider."),
       // MSKS: Multi-Source Knowledge Synthesis parameters
       deep_research: z.boolean().default(false).describe("Use multi-provider AI research (MSKS). Queries providers in parallel and synthesizes findings."),
@@ -17,9 +20,9 @@ export const TOOLS = {
       research_providers: z.array(z.string()).optional().describe("Specific providers (any combination). Standard: chatgpt, gemini, claude, grok, kimi, deepseek. Deep: openai_deep_research, perplexity_sonar, gemini_deep_research, parallel_deep_research."),
       enable_dynamic_evidence: z.boolean().default(false).describe("Use dynamic evidence management with phase-specific compression. Optimizes context for each debate phase."),
       // MCDA: Multi-Criteria Decision Analysis parameters
-      enable_mcda: z.boolean().default(false).describe("Enable multi-criteria decision analysis (MCDA) scoring. Requires criteria_weights to be set."),
+      enable_mcda: z.boolean().optional().describe("Enable multi-criteria decision analysis (MCDA) scoring. Requires criteria_weights to be set."),
       criteria_weights: z.record(z.string(), z.number()).optional().describe("Dict of criterion_name -> weight (0-1), e.g. {'reliability': 0.3, 'cost': 0.25}. Weights should sum to 1."),
-      stake_level: z.enum(["fast", "standard", "high"]).default("standard").describe("Enforcement level: 'fast' (minimal checks), 'standard' (normal validation), 'high' (strict evidence requirements)."),
+      stake_level: z.enum(["fast", "standard", "high"]).optional().describe("Enforcement level: 'fast' (minimal checks), 'standard' (normal validation), 'high' (strict evidence requirements)."),
       evidence_policy: z.object({
         freshness_days_max: z.number().optional(),
         min_coverage_ratio: z.number().optional(),
@@ -30,6 +33,9 @@ export const TOOLS = {
       question: string,
       context?: string,
       mode?: string,
+      counsel_id?: string,
+      debate_mode?: string,
+      max_budget_cents?: number,
       stakeholders?: string[],
       deep_research?: boolean,
       research_depth?: string,
@@ -44,6 +50,9 @@ export const TOOLS = {
         question: args.question,
         context: args.context,
         config: { mode: args.mode },
+        counsel_id: args.counsel_id,
+        debate_mode: args.debate_mode,
+        max_budget_cents: args.max_budget_cents,
         stakeholders: args.stakeholders,
         // MSKS parameters
         deep_research: args.deep_research,
