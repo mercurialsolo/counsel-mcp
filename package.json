@@ -1,6 +1,6 @@
 {
   "name": "counsel-mcp-server",
-  "version": "0.2.2",
+  "version": "0.2.5",
   "description": "Open-source MCP server for connecting AI agents to the Counsel API",
   "author": "Counsel AI",
   "license": "MIT",
