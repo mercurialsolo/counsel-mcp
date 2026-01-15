@@ -47,10 +47,38 @@ export default function createServer(args: { config?: { counselApiKey?: string }
   }
   
   // Create server instance
-  const server = new McpServer({
-    name: "counsel-mcp",
-    version: "0.2.0",
-  });
+  const server = new McpServer(
+    {
+      name: "counsel-mcp",
+      version: "0.2.6",
+    },
+    {
+      instructions: [
+        "Counsel provides strategic analysis through multi-perspective deliberation.\n",
+        "\n",
+        "CRITICAL WORKFLOW:\n",
+        "1. Use 'sharpen_question' for vague/broad questions BEFORE starting analysis\n",
+        "2. Call 'start_consultation' (returns immediately with debate_id)\n",
+        "3. Poll 'get_consultation_status' every 5-10s (analyses take 2-15 min)\n",
+        "4. When status='completed', call 'get_consultation_report'\n",
+        "\n",
+        "MODE SELECTION:\n",
+        "- 'quick': 30s pros/cons (no polling needed, returns immediately)\n",
+        "- 'standard': 2-5min full debate (requires polling)\n",
+        "- 'deep': 5-15min with web research (requires polling)\n",
+        "- 'research': evidence gathering only (no debate)\n",
+        "\n",
+        "PHASE CONSTRAINTS:\n",
+        "- Debates progress through phases: diverge → attack → crux → integrate\n",
+        "- 'get_consultation_status' shows current phase and progress\n",
+        "- Use 'list_consultations' to see past analyses\n",
+        "\n",
+        "SUPPORT TOOLS:\n",
+        "- 'sharpen_question': Refine vague questions before starting\n",
+        "- 'consult_advisor': Interactive brainstorming and problem scoping"
+      ].join(""),
+    }
+  );
 
   // Register all tools
   for (const tool of Object.values(DEBATE_TOOLS)) {

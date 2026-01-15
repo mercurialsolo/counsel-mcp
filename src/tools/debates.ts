@@ -423,5 +423,97 @@ USE THIS WHEN:
         content: [{ type: "text" as const, text: `Research Artifacts (${artifacts.length}):\n${summary}` }]
       };
     }
+  },
+
+  score_evidence_pack: {
+    name: "score_evidence_pack",
+    description: "Score evidence coverage and credibility before running analysis.",
+    schema: {
+      question: z.string().optional().describe("Strategic question to score evidence against"),
+      sources: z.array(z.object({
+        title: z.string().optional(),
+        content: z.string().optional(),
+        url: z.string().optional(),
+        type: z.string().optional()
+      })).optional().describe("Evidence sources with title/content/metadata")
+    },
+    handler: async (args: { question?: string, sources?: Array<{ title?: string, content?: string, url?: string, type?: string }> }) => {
+      const response = await apiClient.post("/evidence/score", {
+        question: args.question,
+        sources: args.sources
+      });
+      const data = response.data;
+      const summary = [
+        `## Evidence Score`,
+        `Overall: ${(data.overall_score * 100).toFixed(0)}%`,
+        data.coverage_score !== undefined ? `Coverage: ${(data.coverage_score * 100).toFixed(0)}%` : null,
+        data.credibility_score !== undefined ? `Credibility: ${(data.credibility_score * 100).toFixed(0)}%` : null,
+        data.relevance_score !== undefined ? `Relevance: ${(data.relevance_score * 100).toFixed(0)}%` : null,
+        data.gaps?.length ? `\n## Gaps Identified\n${data.gaps.map((g: string) => `- ${g}`).join("\n")}` : null,
+        data.recommendations?.length ? `\n## Recommendations\n${data.recommendations.map((r: string) => `- ${r}`).join("\n")}` : null
+      ].filter(Boolean).join("\n");
+      return {
+        content: [{ type: "text" as const, text: summary }]
+      };
+    }
+  },
+
+  list_decision_templates: {
+    name: "list_decision_templates",
+    description: "List decision templates available for the workspace.",
+    schema: {
+      include_public: z.boolean().optional().default(true).describe("Include public templates"),
+      limit: z.number().optional().default(50).describe("Max templates to return"),
+      offset: z.number().optional().default(0).describe("Pagination offset")
+    },
+    handler: async (args: { include_public?: boolean, limit?: number, offset?: number }) => {
+      const response = await apiClient.get("/templates", {
+        params: {
+          include_public: args.include_public ?? true,
+          limit: args.limit || 50,
+          offset: args.offset || 0
+        }
+      });
+      const templates = response.data.templates || response.data.items || response.data || [];
+      if (templates.length === 0) {
+        return {
+          content: [{ type: "text" as const, text: "No decision templates found." }]
+        };
+      }
+      const summary = templates.map((t: any) => {
+        const vars = t.variables?.length ? ` (vars: ${t.variables.map((v: any) => v.name || v).join(", ")})` : "";
+        return `- [${t.id}] **${t.name}**${vars}\n  ${t.description || "No description"}`;
+      }).join("\n");
+      return {
+        content: [{ type: "text" as const, text: `## Decision Templates (${templates.length})\n\n${summary}` }]
+      };
+    }
+  },
+
+  use_decision_template: {
+    name: "use_decision_template",
+    description: "Instantiate a decision template with user-provided variables.",
+    schema: {
+      template_id: z.string().describe("Decision template ID to instantiate"),
+      variables: z.record(z.string(), z.any()).optional().describe("Variable values for template placeholders")
+    },
+    handler: async (args: { template_id: string, variables?: Record<string, any> }) => {
+      const response = await apiClient.post(`/templates/${args.template_id}/use`, {
+        variables: args.variables || {}
+      });
+      const data = response.data;
+      const summary = [
+        `## Template Instantiated`,
+        `\n### Question`,
+        data.question || data.instantiated_question,
+        data.suggested_mode ? `\n### Suggested Mode: ${data.suggested_mode}` : null,
+        data.suggested_stakeholders?.length ? `\n### Suggested Stakeholders\n${data.suggested_stakeholders.map((s: string) => `- ${s}`).join("\n")}` : null,
+        data.suggested_guidance ? `\n### Suggested Guidance\n${data.suggested_guidance}` : null,
+        `\n---\n_Use this question with start_consultation to begin analysis._`
+      ].filter(Boolean).join("\n");
+      return {
+        content: [{ type: "text" as const, text: summary }]
+      };
+    }
   }
 };
