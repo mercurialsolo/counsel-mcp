@@ -16,6 +16,10 @@ An open-source [Model Context Protocol (MCP)](https://modelcontextprotocol.io) s
 
 ---
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/mercurialsolo-counsel-mcp).
+
 ## Table of Contents
 
 - [Quick Start (Hosted)](#quick-start-hosted)
